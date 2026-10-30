@@ -1,7 +1,9 @@
+
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import { fileURLToPath } from "url";
+import { fileURLToPath } from "node:url";
+
 import AuthRoute from "./routes/AuthRoute.js";
 import StudentRoute from "./routes/StudentRoute.js";
 import ScoreRoute from "./routes/ScoreRoute.js";
@@ -10,29 +12,80 @@ import DashboardRoute from "./routes/DashboardRoute.js";
 import UserRoute from "./routes/UserRoute.js";
 import InformationRoute from "./routes/InformationRoute.js";
 
-dotenv.config({ path: fileURLToPath(new URL('../.env', import.meta.url)) });
+// Load environment variables
+dotenv.config({
+    path: fileURLToPath(new URL("../.env", import.meta.url))
+});
 
 const app = express();
 
-app.use(cors());
+// CORS configuration
+const allowedOrigins = [
+    process.env.FRONTEND_URL,
+    "http://localhost:5173"
+].filter(Boolean);
+
+app.use(cors({
+    origin: (origin, callback) => {
+        // Allow requests without an Origin header
+        if (!origin || allowedOrigins.includes(origin)) {
+            return callback(null, true);
+        }
+
+        return callback(new Error("Not allowed by CORS"));
+    },
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true
+}));
+
+// Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use('/api', AuthRoute);
-app.use('/api', StudentRoute);
-app.use('/api', ScoreRoute);
-app.use('/api', AttendanceRoute);
-app.use('/api', DashboardRoute);
-app.use('/api', UserRoute);
-app.use('/api', InformationRoute);
+// API health check
+app.get("/", (req, res) => {
+    res.status(200).json({
+        success: true,
+        message: "Student Management API is running!"
+    });
+});
 
-app.use((error, _req, res, _next) => {
-    console.error('Unhandled request error:', error);
+// API routes
+app.use("/api", AuthRoute);
+app.use("/api", StudentRoute);
+app.use("/api", ScoreRoute);
+app.use("/api", AttendanceRoute);
+app.use("/api", DashboardRoute);
+app.use("/api", UserRoute);
+app.use("/api", InformationRoute);
+
+// Handle unknown routes
+app.use((req, res) => {
+    res.status(404).json({
+        success: false,
+        message: "API endpoint not found"
+    });
+});
+
+// Global error handler
+app.use((error, req, res, next) => {
+    console.error("Unhandled request error:", error);
+
+    if (res.headersSent) {
+        return next(error);
+    }
+
     const status = error.status === 413 ? 413 : 500;
+
     const message = status === 413
-        ? 'Uploaded images must be 5 MB or smaller.'
-        : 'Internal server error';
-    res.status(status).json({ message });
+        ? "Uploaded images must be 5 MB or smaller."
+        : "Internal server error";
+
+    res.status(status).json({
+        success: false,
+        message
+    });
 });
 
 export default app;
