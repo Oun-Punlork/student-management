@@ -1,0 +1,141 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  email     String   @unique
+  password  String
+  role      Role     @default(STUDENT)
+  status    UserStatus @default(ACTIVE)
+  tokenVersion Int @default(0)
+  createdAt DateTime @default(now())
+  emailVerifiedAt DateTime?
+  profileImage Bytes?
+  profileImageMimeType String?
+  student   Student?
+}
+
+model VerificationToken {
+  id        Int      @id @default(autoincrement())
+  email     String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([email])
+  @@index([expiresAt])
+}
+
+model Student {
+  id           Int      @id @default(autoincrement())
+  studentCode  String   @unique
+  firstName    String
+  lastName     String
+  khmerName    String?
+  gender       Gender?
+  dateOfBirth  DateTime?
+  phone        String?
+  address      String?
+  status       StudentStatus @default(ACTIVE)
+  enrolledAt   DateTime @default(now())
+
+  userId       Int?     @unique
+  user         User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  attendances  Attendance[]
+  scores       Score[]
+}
+
+model Subject {
+  id          Int      @id @default(autoincrement())
+  code        String   @unique
+  name        String
+  description String?
+  attendances Attendance[]
+  scores      Score[]
+}
+
+model Attendance {
+  id             Int      @id @default(autoincrement())
+  attendanceDate DateTime
+  status         AttendanceStatus
+
+  studentId      Int
+  subjectId      Int
+
+  student        Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  subject        Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, subjectId, attendanceDate])
+}
+
+model Score {
+  id           Int      @id @default(autoincrement())
+  score        Float    @default(0)
+  midtermScore Float    @default(0)
+  finalScore   Float    @default(0)
+  finalScoreEntered Boolean @default(false)
+  remarks      String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  studentId Int
+  subjectId Int
+
+  student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  subject   Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, subjectId])
+}
+
+model InformationPage {
+  id                        Int       @id @default(1)
+  scheduleImage             Bytes?
+  scheduleImageName         String?
+  scheduleImageMimeType     String?
+  additionalScheduleImage         Bytes?
+  additionalScheduleImageName     String?
+  additionalScheduleImageMimeType String?
+  finalResultsPublishedAt   DateTime?
+  publishedReexamStudents   Json?
+}
+
+enum Role {
+  ADMIN
+  TEACHER
+  STUDENT
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum StudentStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+}

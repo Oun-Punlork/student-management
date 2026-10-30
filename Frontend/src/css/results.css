@@ -1,0 +1,100 @@
+@page {
+  size: A4 landscape;
+  margin: 8mm;
+}
+
+@media print {
+  html,
+  body,
+  #root {
+    width: 100%;
+    min-height: 0;
+    background: #fff !important;
+  }
+
+  body * {
+    visibility: hidden !important;
+  }
+
+  #sidebar,
+  .result-no-print {
+    display: none !important;
+  }
+
+  #result-sheet,
+  #result-sheet * {
+    visibility: visible !important;
+  }
+
+  #result-sheet {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .result-sheet-heading h2 {
+    font-size: 16pt !important;
+  }
+
+  .result-table-wrap {
+    overflow: visible !important;
+  }
+
+  .result-table {
+    width: 100% !important;
+    min-width: 0 !important;
+    table-layout: fixed !important;
+    font-size: 6.5pt !important;
+  }
+
+  .result-table th,
+  .result-table td {
+    padding: 1.2mm 0.6mm !important;
+    border-color: #64748b !important;
+    overflow-wrap: anywhere;
+  }
+
+  .result-table th:nth-child(1),
+  .result-table td:nth-child(1),
+  .result-table th:nth-child(4),
+  .result-table td:nth-child(4) {
+    width: 6mm !important;
+  }
+
+  .result-table .result-khmer-name {
+    width: 28mm !important;
+  }
+
+  .result-table .result-latin-name {
+    width: 31mm !important;
+  }
+
+  .result-table th:nth-child(5),
+  .result-table td:nth-child(5) {
+    width: 17mm !important;
+  }
+
+  .result-table th:nth-child(n + 6),
+  .result-table td:nth-child(n + 6) {
+    width: 7mm !important;
+  }
+
+  .result-table thead {
+    display: table-header-group;
+  }
+
+  .result-row {
+    break-inside: avoid;
+  }
+
+  .result-sheet-footer {
+    margin-top: 12mm !important;
+  }
+}
