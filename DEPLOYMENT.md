@@ -52,8 +52,18 @@ Directory** to `Frontend`. Set this environment variable before deploying:
 - `VITE_API_URL` — the API Vercel production URL, for example
   `https://student-management-api.vercel.app`
 
-The frontend build uses that value for all API requests. Local development keeps
-using the Vite proxy when `VITE_API_URL` is empty.
+Set `VITE_API_URL` to the backend origin only (no trailing slash and no `/api`
+suffix). For example, login will be sent to
+`https://student-management-api.vercel.app/api/login`. This value is embedded
+in the frontend at build time, so add it to the frontend Vercel project's
+Production environment and redeploy after changing it. The frontend fails
+clearly instead of sending API requests to its own domain if this value is
+missing in a production build.
+
+The backend CORS allowlist includes the deployed frontend URL above and local
+Vite origins. Set the API project's `FRONTEND_URL` to the frontend production
+URL as well; this value is also used to build verification email links. Local
+development keeps using the Vite proxy when `VITE_API_URL` is empty.
 
 ## 4. Finish email verification links
 

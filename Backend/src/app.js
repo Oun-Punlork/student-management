@@ -20,15 +20,17 @@ dotenv.config({
 const app = express();
 
 // CORS configuration
-const allowedOrigins = [
+const allowedOrigins = new Set([
     process.env.FRONTEND_URL,
-    "http://localhost:5173"
-].filter(Boolean);
+    "https://student-management-amber-zeta.vercel.app",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173"
+].filter(Boolean).map((origin) => origin.replace(/\/+$/, "")));
 
 app.use(cors({
     origin: (origin, callback) => {
         // Allow requests without an Origin header
-        if (!origin || allowedOrigins.includes(origin)) {
+        if (!origin || allowedOrigins.has(origin)) {
             return callback(null, true);
         }
 

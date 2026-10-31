@@ -1,6 +1,10 @@
-const API_BASE_URL = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
+const API_BASE_URL = (import.meta.env.VITE_API_URL || '').trim().replace(/\/+$/, '');
 
 export function apiUrl(path) {
+  if (import.meta.env.PROD && !API_BASE_URL) {
+    throw new Error('VITE_API_URL is not configured for this production deployment.');
+  }
+
   return `${API_BASE_URL}${path.startsWith('/') ? path : `/${path}`}`;
 }
 
