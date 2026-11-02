@@ -21,10 +21,10 @@ const sendVerificationEmail = async (email, token) => {
   });
 };
 
-const createVerificationToken = async (transaction, email) => {
+const createVerificationToken = async (email) => {
   const token = randomBytes(32).toString('hex');
-  await transaction.verificationToken.deleteMany({ where: { email } });
-  await transaction.verificationToken.create({
+  await prisma.verificationToken.deleteMany({ where: { email } });
+  await prisma.verificationToken.create({
     data: {
       email,
       token: hashVerificationToken(token),
@@ -58,64 +58,62 @@ export const register = async (req, res) => {
     }
 
     const hashPassword = await bcrypt.hash(password, 12);
-    const user = await prisma.$transaction(async (transaction) => {
-      const existingUser = await transaction.user.findFirst({
-        where: {
-          OR: [{ email }, { username }],
-        },
-        select: { email: true },
-      });
-
-      if (existingUser) {
-        const error = new Error(
-          existingUser.email === email
-            ? 'Email is already registered'
-            : 'Username is already taken',
-        );
-        error.statusCode = 400;
-        throw error;
-      }
-
-      const createdUser = await transaction.user.create({
-        data: {
-          username,
-          email,
-          password: hashPassword,
-          role: 'STUDENT',
-        },
-        select: {
-          id: true,
-          username: true,
-          email: true,
-          role: true,
-          status: true,
-          createdAt: true,
-        },
-      });
-
-      let student = await transaction.student.findUnique({
-        where: { userId: createdUser.id },
-      });
-
-      if (!student) {
-        const nameParts = username.split(/\s+/).filter(Boolean);
-        const firstName = nameParts.shift() || username;
-        const lastName = nameParts.join(' ') || 'Student';
-
-        student = await transaction.student.create({
-          data: {
-            studentCode: `STU-${String(createdUser.id).padStart(6, '0')}`,
-            firstName,
-            lastName,
-            status: 'ACTIVE',
-            userId: createdUser.id,
-          },
-        });
-      }
-
-      const verificationToken = await createVerificationToken(transaction, email);
-      return { user: { ...createdUser, student }, verificationToken };
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        OR: [{ email }, { username }],
+      },
+      select: { email: true, username: true },
     });
+
+    if (existingUser) {
+      const error = new Error(
+        existingUser.email === email
+          ? 'Email is already registered'
+          : 'Username is already taken',
+      );
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const createdUser = await prisma.user.create({
+      data: {
+        username,
+        email,
+        password: hashPassword,
+        role: 'STUDENT',
+      },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        role: true,
+        status: true,
+        createdAt: true,
+      },
+    });
+
+    let student = await prisma.student.findUnique({
+      where: { userId: createdUser.id },
+    });
+
+    if (!student) {
+      const nameParts = username.split(/\s+/).filter(Boolean);
+      const firstName = nameParts.shift() || username;
+      const lastName = nameParts.join(' ') || 'Student';
+
+      student = await prisma.student.create({
+        data: {
+          studentCode: `STU-${String(createdUser.id).padStart(6, '0')}`,
+          firstName,
+          lastName,
+          status: 'ACTIVE',
+          userId: createdUser.id,
+        },
+      });
+    }
+
+    const verificationToken = await createVerificationToken(email);
+    const user = { user: { ...createdUser, student }, verificationToken };
 
     try {
       await sendVerificationEmail(email, user.verificationToken);
@@ -239,11 +237,9 @@ export const verifyEmail = async (req, res) => {
       return res.status(200).json({ message: 'Email verified. You can now sign in.' });
     }
 
-    await prisma.$transaction(async (transaction) => {
-      await transaction.user.update({
-        where: { email: verification.email },
-        data: { emailVerifiedAt: new Date() },
-      });
+    await prisma.user.update({
+      where: { email: verification.email },
+      data: { emailVerifiedAt: new Date() },
     });
 
     return res.status(200).json({ message: 'Email verified. You can now sign in.' });
@@ -271,7 +267,7 @@ export const resendVerificationEmail = async (req, res) => {
       });
     }
 
-    const token = await prisma.$transaction((transaction) => createVerificationToken(transaction, email));
+    const token = await createVerificationToken(email);
     try {
       await sendVerificationEmail(email, token);
     } catch (error) {
