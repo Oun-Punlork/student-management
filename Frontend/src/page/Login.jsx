@@ -62,7 +62,7 @@ export default function Login() {
         <div className="p-8 sm:p-10">
           <div className="mb-7 text-center">
             <h2 className="text-xl font-bold text-slate-900 tracking-tight">Welcome Back</h2>
-            <p className="text-slate-500 text-xs mt-1 font-medium">Please enter your details to sign in</p>
+            <p className="text-slate-500 text-xs mt-1 font-medium">Please enter your credentials to sign in</p>
           </div>
 
           <AlertMessage message={errorMessage} />
