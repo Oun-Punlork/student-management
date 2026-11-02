@@ -60,10 +60,16 @@ Production environment and redeploy after changing it. The frontend fails
 clearly instead of sending API requests to its own domain if this value is
 missing in a production build.
 
-The backend CORS allowlist includes the deployed frontend URL above and local
-Vite origins. Set the API project's `FRONTEND_URL` to the frontend production
-URL as well; this value is also used to build verification email links. Local
-development keeps using the Vite proxy when `VITE_API_URL` is empty.
+The backend CORS allowlist includes the deployed frontend URL above, local
+Vite origins, and Vercel-hosted frontend domains for preview/production builds.
+Set the API project's `FRONTEND_URL` to the frontend production URL as well;
+this value is also used to build verification email links. Local development
+keeps using the Vite proxy when `VITE_API_URL` is empty.
+
+If the frontend is deployed on a different Vercel domain than expected, update
+`VITE_API_URL` in the frontend project and `FRONTEND_URL` in the API project to
+match the live origin exactly. Otherwise the browser will block requests with a
+network/CORS error during sign-in.
 
 ## 4. Finish email verification links
 

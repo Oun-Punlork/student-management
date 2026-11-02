@@ -9,28 +9,38 @@ export function apiUrl(path) {
 }
 
 async function request(url, options = {}) {
-  const response = await fetch(apiUrl(url), {
-    credentials: 'same-origin',
-    ...options,
-  });
+  try {
+    const response = await fetch(apiUrl(url), {
+      credentials: 'include',
+      ...options,
+    });
 
-  const contentType = response.headers.get('content-type') || '';
-  const data = contentType.includes('application/json')
-    ? await response.json()
-    : { message: 'The server returned an unexpected response.' };
+    const contentType = response.headers.get('content-type') || '';
+    const data = contentType.includes('application/json')
+      ? await response.json()
+      : { message: 'The server returned an unexpected response.' };
 
-  if (!response.ok) {
-    if (response.status === 401) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
+    if (!response.ok) {
+      if (response.status === 401) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+      }
+      const error = new Error(data.message || 'Request failed.');
+      error.status = response.status;
+      error.code = data.code;
+      throw error;
     }
-    const error = new Error(data.message || 'Request failed.');
-    error.status = response.status;
-    error.code = data.code;
+
+    return data;
+  } catch (error) {
+    if (error instanceof TypeError) {
+      const networkError = new Error('Unable to reach the server. Please check your connection and try again.');
+      networkError.code = 'NETWORK_ERROR';
+      throw networkError;
+    }
+
     throw error;
   }
-
-  return data;
 }
 
 export function registerUser(payload) {

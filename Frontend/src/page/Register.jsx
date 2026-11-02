@@ -61,7 +61,7 @@ export default function RegisterPage() {
       setIsLoading(false);
     }
   };
-
+  // fixed
   return (
     <div className="bg-slate-50 min-h-screen flex items-center justify-center p-4 antialiased text-slate-800 font-sans">
       <div className="w-full max-w-md bg-white rounded-3xl shadow-sm border border-slate-200/80 overflow-hidden relative">

@@ -22,15 +22,28 @@ const app = express();
 // CORS configuration
 const allowedOrigins = new Set([
     process.env.FRONTEND_URL,
+    process.env.APP_FRONTEND_URL,
     "https://student-management-amber-zeta.vercel.app",
+    "https://student-management-frontend-g1j5z5duy-oun-punlork.vercel.app",
     "http://localhost:5173",
     "http://127.0.0.1:5173"
 ].filter(Boolean).map((origin) => origin.replace(/\/+$/, "")));
 
+const isAllowedOrigin = (origin) => {
+    if (!origin) return true;
+
+    const normalized = origin.replace(/\/+$/, "");
+    if (allowedOrigins.has(normalized)) {
+        return true;
+    }
+
+    return /^(https?:\/\/)([a-z0-9-]+\.)*vercel\.app$/i.test(normalized)
+        || /^(https?:\/\/)(localhost|127\.0\.0\.1)(:\d+)?$/i.test(normalized);
+};
+
 app.use(cors({
     origin: (origin, callback) => {
-        // Allow requests without an Origin header
-        if (!origin || allowedOrigins.has(origin)) {
+        if (isAllowedOrigin(origin)) {
             return callback(null, true);
         }
 
