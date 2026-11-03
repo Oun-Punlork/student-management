@@ -32,6 +32,8 @@ and Development as appropriate):
 - `JWT_SECRET` — a long, unique random secret
 - `JWT_EXPIRES_IN` — optional; defaults to `1d`
 - `FRONTEND_URL` — the frontend's Vercel production URL
+- `CORS_ORIGINS` — optional comma-separated list of additional allowed frontend
+  origins (use full origins such as `https://school.example.com`, without paths)
 - `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS` — working
   SMTP settings; for Gmail use an App Password
 - `MAIL_FROM` — optional sender label/address
@@ -61,7 +63,9 @@ clearly instead of sending API requests to its own domain if this value is
 missing in a production build.
 
 The backend CORS allowlist includes the deployed frontend URL above, local
-Vite origins, and Vercel-hosted frontend domains for preview/production builds.
+Vite origins, Vercel-hosted frontend domains for preview/production builds, and
+any origins listed in `CORS_ORIGINS`. CORS headers are applied before the API
+connects to the database, including on preflight and database error responses.
 Set the API project's `FRONTEND_URL` to the frontend production URL as well;
 this value is also used to build verification email links. Local development
 keeps using the Vite proxy when `VITE_API_URL` is empty.

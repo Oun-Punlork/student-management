@@ -23,11 +23,12 @@ const app = express();
 const allowedOrigins = new Set([
     process.env.FRONTEND_URL,
     process.env.APP_FRONTEND_URL,
+    ...(process.env.CORS_ORIGINS || "").split(","),
     "https://student-management-amber-zeta.vercel.app",
     "https://student-management-frontend-g1j5z5duy-oun-punlork.vercel.app",
     "http://localhost:5173",
     "http://127.0.0.1:5173"
-].filter(Boolean).map((origin) => origin.replace(/\/+$/, "")));
+].map((origin) => origin?.trim()).filter(Boolean).map((origin) => origin.replace(/\/+$/, "")));
 
 const isAllowedOrigin = (origin) => {
     if (!origin) return true;
@@ -41,7 +42,7 @@ const isAllowedOrigin = (origin) => {
         || /^(https?:\/\/)(localhost|127\.0\.0\.1)(:\d+)?$/i.test(normalized);
 };
 
-app.use(cors({
+export const corsMiddleware = cors({
     origin: (origin, callback) => {
         if (isAllowedOrigin(origin)) {
             return callback(null, true);
@@ -52,7 +53,20 @@ app.use(cors({
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true
-}));
+});
+
+app.use((req, res, next) => {
+    if (req.corsHandled) {
+        return next();
+    }
+
+    return corsMiddleware(req, res, (error) => {
+        if (!error) {
+            req.corsHandled = true;
+        }
+        next(error);
+    });
+});
 
 // Middleware
 app.use(express.json());
