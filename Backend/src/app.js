@@ -24,8 +24,6 @@ const allowedOrigins = new Set([
     process.env.FRONTEND_URL,
     process.env.APP_FRONTEND_URL,
     ...(process.env.CORS_ORIGINS || "").split(","),
-    "https://student-management-amber-zeta.vercel.app",
-    "https://student-management-frontend-g1j5z5duy-oun-punlork.vercel.app",
     "http://localhost:5173",
     "http://127.0.0.1:5173"
 ].map((origin) => origin?.trim()).filter(Boolean).map((origin) => origin.replace(/\/+$/, "")));
