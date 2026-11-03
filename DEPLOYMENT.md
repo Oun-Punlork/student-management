@@ -31,7 +31,7 @@ and Development as appropriate):
 - `DATABASE_URL` — the PostgreSQL connection string
 - `JWT_SECRET` — a long, unique random secret
 - `JWT_EXPIRES_IN` — optional; defaults to `1d`
-- `FRONTEND_URL` — the frontend's Vercel production URL
+- `FRONTEND_URL` — `https://student-management-frontend-lake-sigma.vercel.app`
 - `CORS_ORIGINS` — optional comma-separated list of additional allowed frontend
   origins (use full origins such as `https://school.example.com`, without paths)
 - `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS` — working
@@ -51,8 +51,7 @@ npx prisma migrate deploy
 Create another Vercel project from the same GitHub repository and set **Root
 Directory** to `Frontend`. Set this environment variable before deploying:
 
-- `VITE_API_URL` — the API Vercel production URL, for example
-  `https://student-management-api.vercel.app`
+- `VITE_API_URL` — `https://student-management-three-zeta.vercel.app`
 
 Set `VITE_API_URL` to the backend origin only (no trailing slash and no `/api`
 suffix). For example, login will be sent to
@@ -63,9 +62,10 @@ clearly instead of sending API requests to its own domain if this value is
 missing in a production build.
 
 The backend CORS allowlist includes the deployed frontend URL above, local
-Vite origins, Vercel-hosted frontend domains for preview/production builds, and
-any origins listed in `CORS_ORIGINS`. CORS headers are applied before the API
-connects to the database, including on preflight and database error responses.
+development origins, and any origins listed in `CORS_ORIGINS`. Add preview
+deployment domains explicitly to `CORS_ORIGINS` if those previews need API
+access. CORS headers are applied before the API connects to the database,
+including on preflight and database error responses.
 Set the API project's `FRONTEND_URL` to the frontend production URL as well;
 this value is also used to build verification email links. Local development
 keeps using the Vite proxy when `VITE_API_URL` is empty.

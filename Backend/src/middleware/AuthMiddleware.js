@@ -2,6 +2,10 @@ import jwt from 'jsonwebtoken';
 import { prisma } from "../../config/db.js";
 
 export const authmiddleware = async (req, res, next) => {
+    if (req.method === "OPTIONS") {
+        return next();
+    }
+
     try {
         const authHeader = req.headers.authorization;
         const bearerToken = authHeader?.startsWith("Bearer ")

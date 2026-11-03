@@ -24,20 +24,16 @@ const allowedOrigins = new Set([
     process.env.FRONTEND_URL,
     process.env.APP_FRONTEND_URL,
     ...(process.env.CORS_ORIGINS || "").split(","),
+    "https://student-management-frontend-lake-sigma.vercel.app",
     "http://localhost:5173",
+    "http://localhost:3000",
     "http://127.0.0.1:5173"
 ].map((origin) => origin?.trim()).filter(Boolean).map((origin) => origin.replace(/\/+$/, "")));
 
 const isAllowedOrigin = (origin) => {
     if (!origin) return true;
 
-    const normalized = origin.replace(/\/+$/, "");
-    if (allowedOrigins.has(normalized)) {
-        return true;
-    }
-
-    return /^(https?:\/\/)([a-z0-9-]+\.)*vercel\.app$/i.test(normalized)
-        || /^(https?:\/\/)(localhost|127\.0\.0\.1)(:\d+)?$/i.test(normalized);
+    return allowedOrigins.has(origin.replace(/\/+$/, ""));
 };
 
 export const corsMiddleware = cors({
@@ -72,10 +68,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // API health check
 app.get("/", (req, res) => {
-    res.status(200).json({
-        success: true,
-        message: "Student Management API is running!"
-    });
+    res.status(200).json({ status: "ok" });
 });
 
 // API routes

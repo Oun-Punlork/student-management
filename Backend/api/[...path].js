@@ -24,6 +24,11 @@ export default async function handler(req, res) {
 
     if (res.writableEnded) return;
 
+    const requestPath = new URL(req.url, 'http://localhost').pathname;
+    if (req.method === 'GET' && requestPath === '/') {
+      return app(req, res);
+    }
+
     connection ||= connectDB();
     await connection;
     return app(req, res);

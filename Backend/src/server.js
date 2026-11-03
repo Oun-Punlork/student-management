@@ -29,24 +29,28 @@ const startServer = async () => {
     }
 };
 
-startServer();
+if (!process.env.VERCEL) {
+    startServer();
 
-process.on('unhandledRejection', async (err) => {
-    console.error(`Error: ${err.message}`);
-    await shutdown(1);
-});
+    process.on('unhandledRejection', async (err) => {
+        console.error(`Error: ${err.message}`);
+        await shutdown(1);
+    });
 
-process.on('uncaughtException', async (err) => {
-    console.error(`Error: ${err.message}`);
-    await shutdown(1);
-});
+    process.on('uncaughtException', async (err) => {
+        console.error(`Error: ${err.message}`);
+        await shutdown(1);
+    });
 
-process.on('SIGTERM', () => {
-    console.log('SIGTERM received. Shutting down gracefully.');
-    shutdown(0);
-});
+    process.on('SIGTERM', () => {
+        console.log('SIGTERM received. Shutting down gracefully.');
+        shutdown(0);
+    });
 
-process.on('SIGINT', () => {
-    console.log('SIGINT received. Shutting down gracefully.');
-    shutdown(0);
-});
+    process.on('SIGINT', () => {
+        console.log('SIGINT received. Shutting down gracefully.');
+        shutdown(0);
+    });
+}
+
+export default app;
