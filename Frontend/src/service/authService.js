@@ -109,7 +109,7 @@ export function uploadProfileImage(file) {
   return request('/api/me/profile-image', {
     method: 'PUT',
     headers: {
-      Authorization: `******`,
+      Authorization: `Bearer ${token}`,
       'Content-Type': file.type,
     },
     body: file,
